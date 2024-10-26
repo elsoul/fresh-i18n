@@ -44,8 +44,8 @@ import { i18nPlugin } from '@elsoul/fresh-i18n'
 export const app = new App({
   root: import.meta.url,
 })
-  .use(staticFiles()) // Serve static files
-  .use(trailingSlashes('never')) // Do not add trailing slashes to URLs
+  .use(staticFiles())
+  .use(trailingSlashes('never'))
   .use(i18nPlugin({
     languages: ['en', 'ja'], // Supported languages
     defaultLocale: 'en', // Default language
@@ -107,16 +107,6 @@ export default function Home() {
     </div>
   )
 }
-```
-
-### Step 4: Dynamically Change Language
-
-Use the `changeLanguage()` function from the `useLocale()` hook to dynamically
-switch between languages.
-
-```tsx
-const { changeLanguage } = useLocale()
-changeLanguage('ja') // Switch to Japanese
 ```
 
 ## Contributing
