@@ -1,16 +1,26 @@
+// useTranslation.ts
+
 import { translationData } from '@/src/store.ts'
 
 /**
- * Provides access to translation strings within a specified namespace.
+ * Provides access to translation strings with support for deeply nested keys.
  *
- * @param namespace - The namespace of translations to retrieve (e.g., 'common', 'company').
- * @returns An object containing a function to fetch translations by key within the given namespace.
+ * @returns An object containing a function to fetch translations by deeply nested key.
  */
-export function useTranslation(
-  namespace: string,
-): { t: (key: string) => string } {
+export function useTranslation(): { t: (key: string) => string } {
   const translate = (key: string): string => {
-    return translationData.value[namespace]?.[key] ?? key
+    const keys = key.split('.')
+    let value: unknown = translationData.value
+
+    for (const k of keys) {
+      if (value && typeof value === 'object' && k in value) {
+        value = (value as Record<string, unknown>)[k]
+      } else {
+        return key // Fallback to the key if the path is not found
+      }
+    }
+
+    return typeof value === 'string' ? value : key
   }
 
   return { t: translate }

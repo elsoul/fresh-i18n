@@ -108,7 +108,7 @@ translations and handle language switching dynamically.
 ```tsx
 import { useLocale, useTranslation } from '@elsoul/fresh-i18n'
 
-export default function Home() {
+export default function IslandsComponent() {
   const { t } = useTranslation('common') // Uses "common" namespace
   const { locale, changeLanguage } = useLocale()
 
@@ -122,6 +122,52 @@ export default function Home() {
     </div>
   )
 }
+```
+
+### Define an Extended State with TranslationState
+
+If you are managing additional global state in your Fresh app, such as metadata
+or theme settings, you can extend TranslationState to include your own
+properties. This extended state can then be used across your app, with
+translation data (t) accessible directly in request handlers, enabling
+Server-Side Rendering (SSR) with fully localized content.
+
+#### Example
+
+In the following example, TranslationState from @elsoul/fresh-i18n is combined
+with a custom State interface to create ExtendedState. This ExtendedState
+includes both translation data and other application-specific properties, making
+it convenient for global state management.
+
+ExtendedState can then be used in request handlers to access translation data
+directly via ctx.state.t, enabling SSR with localized data.
+
+```typescript
+import { createDefine } from 'fresh'
+import type { TranslationState } from '@elsoul/fresh-i18n'
+
+interface State {
+  title?: string
+  lang?: string
+  theme?: string
+  description?: string
+  ogImage?: string
+  noIndex?: boolean
+}
+
+// Combine TranslationState with custom State properties
+export type ExtendedState = State & TranslationState
+
+// Define the extended state for use in your Fresh app
+export const define = createDefine<ExtendedState>()
+
+// Example usage in a route handler
+export const handler = define.handlers({
+  GET(ctx) {
+    console.log('ctx', ctx.state.t) // Access translation data directly
+    return page()
+  },
+})
 ```
 
 ### API Reference
