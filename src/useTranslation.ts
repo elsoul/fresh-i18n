@@ -7,19 +7,21 @@ import { translationData } from '@/src/store.ts'
  */
 export function useTranslation(): { t: (key: string) => string } {
   const translate = (key: string): string => {
-    const keys = key.split('.')
-    let value: unknown = translationData.value
+    const keys = key.split('.') // Split the key by dot
+    let value: unknown = translationData.value // Get the value from translationData
+
+    console.log('Translation Data:', translationData.value) // Check translation data
 
     for (const k of keys) {
       if (value && typeof value === 'object' && k in value) {
-        value = (value as Record<string, unknown>)[k]
+        value = (value as Record<string, unknown>)[k] // Retrieve the nested key
       } else {
-        return key // Fallback to the key if the path is not found
+        return key // Return the key if not found
       }
     }
 
-    return typeof value === 'string' ? value : key
+    return typeof value === 'string' ? value : key // Return value if it's a string, otherwise return the key
   }
 
-  return { t: translate }
+  return { t: translate } // Return the translation function
 }

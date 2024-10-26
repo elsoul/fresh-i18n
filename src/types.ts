@@ -34,5 +34,5 @@ export type MiddlewareFn<State> = (
 export interface TranslationState {
   t: Record<string, Record<string, string>>
   path: string
-  lang: string
+  locale: string
 }

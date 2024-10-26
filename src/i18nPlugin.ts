@@ -54,7 +54,7 @@ export const i18nPlugin = (
       : url.pathname
 
     ctx.state.path = rootPath
-    ctx.state.lang = lang
+    ctx.state.locale = lang
 
     pathname.value = rootPath
 
