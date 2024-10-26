@@ -1,4 +1,5 @@
 import { translationData } from '@/src/store.ts'
+import { useAtom } from 'fresh-atom'
 
 /**
  * Provides access to translation strings with support for deeply nested keys.
@@ -6,11 +7,10 @@ import { translationData } from '@/src/store.ts'
  * @returns An object containing a function to fetch translations by deeply nested key.
  */
 export function useTranslation(): { t: (key: string) => string } {
+  const [data] = useAtom(translationData)
   const translate = (key: string): string => {
     const keys = key.split('.') // Split the key by dot
-    let value: unknown = translationData.get() // Get the value from translationData
-
-    console.log('Translation Data:', translationData.get()) // Check translation data
+    let value: unknown = data // Get the value from translationData
 
     for (const k of keys) {
       if (value && typeof value === 'object' && k in value) {

@@ -1,4 +1,5 @@
 import { pathname } from '@/src/store.ts'
+import { useAtom } from 'fresh-atom'
 
 /**
  * Hook to access the root path of the current URL without the language prefix.
@@ -6,5 +7,6 @@ import { pathname } from '@/src/store.ts'
  * @returns The current pathname without the locale prefix.
  */
 export function usePathname(): string {
-  return pathname.get()
+  const [currentPath] = useAtom(pathname)
+  return currentPath
 }

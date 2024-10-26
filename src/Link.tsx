@@ -1,6 +1,6 @@
 import type { h } from 'preact'
-import { currentLocale } from '@/src/store.ts'
 import type { JSX } from 'preact'
+import { useLocale } from '@/src/useLocale.ts'
 
 /**
  * Props for the Link component.
@@ -19,9 +19,8 @@ type LinkProps = JSX.IntrinsicElements['a'] & {
  * @returns A link component with the current locale prefixed to the href.
  */
 export function Link({ href, children, ...props }: LinkProps): h.JSX.Element {
-  const localizedHref = `/${currentLocale.get()}${
-    href.startsWith('/') ? href : `/${href}`
-  }`
+  const { locale } = useLocale()
+  const localizedHref = `/${locale}${href.startsWith('/') ? href : `/${href}`}`
 
   return (
     <a href={localizedHref} {...props}>
