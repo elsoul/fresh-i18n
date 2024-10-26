@@ -41,7 +41,7 @@ async function readJsonFile(filePath: string): Promise<Record<string, string>> {
  */
 export const i18nPlugin = (
   { languages, defaultLanguage, localesDir }: I18nOptions,
-): MiddlewareFn<TranslationState & { [key: string]: unknown }> => {
+): MiddlewareFn<TranslationState> => {
   return async (ctx) => {
     const url = new URL(ctx.req.url)
     const pathSegments = url.pathname.split('/').filter(Boolean)
