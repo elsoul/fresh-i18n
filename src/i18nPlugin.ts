@@ -1,6 +1,6 @@
 import { join } from '@std/path'
 import { pathname, translationData } from '@/src/store.ts'
-import type { MiddlewareFn, TranslationState } from '@/src/types.ts'
+import type { MiddlewareFn } from '@/src/types.ts'
 
 /**
  * Configuration options for the i18n plugin.
@@ -41,7 +41,9 @@ async function readJsonFile(filePath: string): Promise<Record<string, string>> {
  */
 export const i18nPlugin = (
   { languages, defaultLanguage, localesDir }: I18nOptions,
-): MiddlewareFn<TranslationState> => {
+): MiddlewareFn<
+  { t: Record<string, Record<string, string>>; path: string; locale: string }
+> => {
   return async (ctx) => {
     const url = new URL(ctx.req.url)
     const pathSegments = url.pathname.split('/').filter(Boolean)
@@ -55,8 +57,8 @@ export const i18nPlugin = (
       : url.pathname
 
     // Set the current state values
-    ctx.state.path = rootPath
-    ctx.state.locale = lang
+    ctx.state.path = rootPath // Valid
+    ctx.state.locale = lang // Valid
 
     pathname.value = rootPath
 
@@ -69,12 +71,10 @@ export const i18nPlugin = (
      * @param namespace - The namespace of the translation file to load (e.g., 'common').
      */
     const loadTranslation = async (namespace: string) => {
-      try {
-        const filePath = join(localesDir, lang, `${namespace}.json`)
-        const data = await readJsonFile(filePath)
-        translationDataSSR[namespace] = data
-      } catch {
-        // Ignore if the translation file does not exist
+      const filePath = join(localesDir, lang, `${namespace}.json`)
+      const data = await readJsonFile(filePath)
+      if (Object.keys(data).length > 0) {
+        translationDataSSR[namespace] = data // Only add if data exists
       }
     }
 
