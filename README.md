@@ -1,20 +1,23 @@
 # `@elsoul/fresh-i18n`
 
-`@elsoul/fresh-i18n` is a simple and flexible internationalization (i18n) plugin
-for Deno's Fresh framework. It allows you to easily manage multiple languages in
-your Fresh app using JSON-based translations and locale detection.
+`@elsoul/fresh-i18n` is an efficient and adaptable internationalization (i18n)
+plugin designed specifically for Deno's Fresh v2 framework. It enables easy
+language management within your Fresh app, providing JSON-based translations,
+automatic locale detection, and optimized data loading for an edge-native
+experience.
 
 ## Features
 
-- **Automatic Locale Detection**: Automatically detects the user's language
-  based on request headers or URL parameters.
-- **Namespace Support**: Organize translations by namespaces in JSON files for
-  efficient loading and modularization.
-- **Simple Hooks API**: Use `useTranslation()` to fetch translations and
-  `useLocale()` to get or change the current locale.
-- **Edge-native**: Optimized for Deno's edge servers for high performance.
-- **Dynamic Language Switching**: Enables dynamic language switching within your
-  components.
+- **Automatic Locale Detection**: Seamlessly detects the user's language from
+  URL parameters, defaulting to a specified language when needed.
+- **Modular Translation Loading**: Organize translations by namespaces for
+  structured, optimized JSON loading.
+- **Intuitive API**: Fetch translations via `useTranslation()` and access or
+  switch locales with `useLocale()`.
+- **Optimized for Deno Edge**: Designed to work efficiently in edge
+  environments, leveraging Deno's performance.
+- **Dynamic Language Switching**: Allows for real-time language changes within
+  components without a page reload.
 
 ## Installation
 
@@ -32,24 +35,25 @@ import { i18nPlugin } from 'https://deno.land/x/fresh_i18n/mod.ts'
 
 ## Usage
 
-### Step 1: Register the Plugin (Updated for Fresh v2)
+### Step 1: Register the Plugin
 
-In your `main.ts` file, register the plugin, specifying the available locales
-and default language, along with any namespaces you wish to use.
+In your `main.ts`, initialize the plugin with available languages, default
+locale, and translation directory. This setup automatically detects the
+preferred locale based on the URL.
 
 ```typescript
 import { App, fsRoutes, staticFiles, trailingSlashes } from 'fresh'
-import { i18nPlugin } from '@elsoul/fresh-i18n'
+import { i18nPlugin, type TranslationState } from '@elsoul/fresh-i18n'
 
-export const app = new App({
+export const app = new App<{ state: TranslationState }>({
   root: import.meta.url,
 })
   .use(staticFiles())
   .use(trailingSlashes('never'))
   .use(i18nPlugin({
     languages: ['en', 'ja'], // Supported languages
-    defaultLocale: 'en', // Default language
-    localesDir: './locales', // Directory path to JSON files
+    defaultLanguage: 'en', // Default language
+    localesDir: './locales', // Path to locale JSON files
   }))
 
 await fsRoutes(app, {
@@ -62,10 +66,21 @@ if (import.meta.main) {
 }
 ```
 
-### Step 2: Create JSON Translation Files
+### Step 2: Create Locale JSON Files
 
-In the `locales` directory, create folders for each locale and JSON files for
-each namespace.
+Inside the `locales` directory, create subfolders for each locale and organize
+translation keys in namespace files. These files are loaded dynamically based on
+the URL structure.
+
+For example, if the URL is `https://example.com/en/company/profile`, the plugin
+will load the following files (if they exist):
+
+- `./locales/en/common.json` (always loaded as the base translation)
+- `./locales/en/company.json`
+- `./locales/en/profile.json`
+
+Each of these files corresponds to a "namespace" in the translation data. If a
+file does not exist, it is skipped without an error, ensuring flexibility.
 
 #### Example: `locales/en/common.json`
 
@@ -87,20 +102,20 @@ each namespace.
 
 ### Step 3: Use Translations in Components
 
-Use the `useTranslation()` and `useLocale()` hooks in your components to fetch
-translations and switch between locales dynamically.
+Leverage `useTranslation()` and `useLocale()` hooks in components to access
+translations and handle language switching dynamically.
 
 ```tsx
 import { useLocale, useTranslation } from '@elsoul/fresh-i18n'
 
 export default function Home() {
-  const { t } = useTranslation('common') // Use the "common" namespace
+  const { t } = useTranslation('common') // Uses "common" namespace
   const { locale, changeLanguage } = useLocale()
 
   return (
     <div>
-      <h1>{t('title')}</h1> {/* Outputs 'Home' or 'ホーム' */}
-      <p>{t('welcome')}</p> {/* Outputs 'Welcome' or 'ようこそ' */}
+      <h1>{t('title')}</h1> {/* Outputs "Home" or "ホーム" */}
+      <p>{t('welcome')}</p> {/* Outputs "Welcome" or "ようこそ" */}
       <p>Current language: {locale}</p>
       <button onClick={() => changeLanguage('en')}>English</button>
       <button onClick={() => changeLanguage('ja')}>日本語</button>
@@ -109,12 +124,52 @@ export default function Home() {
 }
 ```
 
+### API Reference
+
+#### `i18nPlugin(options)`
+
+Registers the i18n middleware for handling translation loading and locale
+management.
+
+- **Options**:
+  - `languages` (string[]): An array of supported languages (e.g.,
+    `['en', 'ja']`).
+  - `defaultLanguage` (string): The default language code, used if no locale is
+    detected.
+  - `localesDir` (string): Path to the directory containing locale files.
+
+#### `useTranslation(namespace: string)`
+
+Hook to access translation strings within a specified namespace.
+
+- **Parameters**:
+  - `namespace` (string): Namespace identifier to load relevant translations.
+
+#### `useLocale()`
+
+Hook to retrieve and change the current locale.
+
+- **Returns**:
+  - `locale` (string): Current locale code.
+  - `changeLanguage` (function): Function to update the locale.
+
+#### `Link` Component
+
+A custom `Link` component that maintains the current locale in app-internal
+links for consistent navigation.
+
+```tsx
+import { Link } from '@elsoul/fresh-i18n';
+
+<Link href="/about">About Us</Link> {/* Locale-aware navigation */}
+```
+
 ## Contributing
 
-Contributions are welcome! Please feel free to submit issues or pull requests on
+Contributions are welcome! Please submit any issues or pull requests via
 [GitHub](https://github.com/elsoul/fresh-i18n).
 
 ## License
 
-This package is open-source and available under the
+This package is open-source, available under the
 [Apache-2.0 License](https://www.apache.org/licenses/LICENSE-2.0).

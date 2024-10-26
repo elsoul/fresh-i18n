@@ -1,29 +1,21 @@
-import { useLocale } from './useLocale.ts'
-import { useEffect, useState } from 'preact/hooks'
+import { translationData } from '@/src/store.ts'
 
 /**
- * Custom hook to load translations for a specific namespace.
+ * Provides access to translation strings within a specified namespace.
  *
- * @param namespace - The namespace for which to load translations.
- * @returns An object containing the translation function `t`.
+ * @param namespace - The namespace of translations to retrieve (e.g., 'common', 'company').
+ * @returns An object containing a function to fetch translations by key within the given namespace.
  */
-export function useTranslation(
-  namespace: string,
-): { t: (key: string) => string } {
-  const { loadNamespaceTranslations } = useLocale()
-  const [translations, setTranslations] = useState<Record<string, string>>({})
-
-  useEffect(() => {
-    const loadTranslations = async () => {
-      const loadedTranslations = await loadNamespaceTranslations(namespace)
-      setTranslations(loadedTranslations)
-    }
-    loadTranslations()
-  }, [namespace])
-
-  const t = (key: string): string => {
-    return translations[key] || key
+export function useTranslation(namespace: string) {
+  /**
+   * Fetches the translation for a specific key within the namespace.
+   *
+   * @param key - The translation key to retrieve (e.g., 'title', 'welcome').
+   * @returns The translated string, or the key itself if no translation is found.
+   */
+  const translate = (key: string): string => {
+    return translationData.value[namespace]?.[key] ?? key
   }
 
-  return { t }
+  return { t: translate }
 }

@@ -1,45 +1,27 @@
-import { useSignal } from '@preact/signals'
-import { createContext } from 'preact'
-import { useContext } from 'preact/hooks'
-
-interface LocaleContextProps {
-  locale: string // Current locale
-  setLocale: (locale: string) => void // Function to set a new locale
-  loadNamespaceTranslations: (
-    namespace: string,
-  ) => Promise<{ [key: string]: string }> // Function to load translations for a given namespace
-}
-
-const LocaleContext = createContext<LocaleContextProps>({
-  locale: 'en',
-  setLocale: () => {},
-  loadNamespaceTranslations: async () => ({}),
-})
-
-const localeSignal = useSignal('en')
+import { currentLocale } from '@/src/store.ts'
 
 /**
- * Sets the initial locale for the application.
+ * Provides access to the current locale and a function to change the locale.
  *
- * @param locale - The locale to set as the initial value.
+ * @returns An object containing the current locale and a function to change the locale.
  */
-export function setInitialLocale(locale: string) {
-  localeSignal.value = locale
-}
+export function useLocale() {
+  /**
+   * Updates the current locale and redirects to the new URL with updated locale in the path.
+   *
+   * @param newLocale - The new locale to set (e.g., 'en', 'ja').
+   */
+  const changeLanguage = (newLocale: string) => {
+    if (newLocale === currentLocale.value) return
 
-/**
- * Custom hook to access and manage the locale context.
- *
- * @returns An object containing the current locale, a function to set the locale, and a function to load translations.
- */
-export function useLocale(): LocaleContextProps {
-  const context = useContext(LocaleContext)
-  return {
-    locale: localeSignal.value,
-    setLocale: (newLocale: string) => {
-      localeSignal.value = newLocale
-      context.setLocale(newLocale)
-    },
-    loadNamespaceTranslations: context.loadNamespaceTranslations,
+    currentLocale.value = newLocale
+    const currentPath = globalThis.location.pathname.split('/').filter(Boolean)
+    const updatedPath = `/${newLocale}/${currentPath.slice(1).join('/')}`
+
+    // Redirect to the new path with the updated locale
+    globalThis.location.href =
+      `${globalThis.location.origin}${updatedPath}${globalThis.location.search}`
   }
+
+  return { locale: currentLocale.value, changeLanguage }
 }
