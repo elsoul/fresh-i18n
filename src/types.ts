@@ -20,9 +20,9 @@ export interface FreshContext<State> {
  * @param ctx - The FreshContext with the current request and state.
  * @returns A promise resolving to a `Response` or void.
  */
-export type MiddlewareFn<State = TranslationState> = (
+export type MiddlewareFn<State> = (
   ctx: FreshContext<State>,
-) => Promise<Response | void>
+) => Promise<Response>
 
 /**
  * Represents the state of translations, the base path, and locale within the app.
