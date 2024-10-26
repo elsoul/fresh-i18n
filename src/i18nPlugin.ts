@@ -10,6 +10,13 @@ interface TranslationState {
   ) => Promise<{ [key: string]: string }>
 }
 
+/**
+ * i18nPlugin creates a middleware function for internationalization in a Fresh app.
+ * It initializes the locale and loads translations based on the user's preferences.
+ *
+ * @param options - Configuration options for the i18n plugin.
+ * @returns A middleware function that adds locale and translations to the context state.
+ */
 export function i18nPlugin<T>(
   options: I18nOptions,
 ): MiddlewareFn<T & TranslationState> {

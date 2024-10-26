@@ -1,6 +1,12 @@
 import { useLocale } from './useLocale.ts'
 import { useEffect, useState } from 'preact/hooks'
 
+/**
+ * Custom hook to load translations for a specific namespace.
+ *
+ * @param namespace - The namespace for which to load translations.
+ * @returns An object containing the translation function `t`.
+ */
 export function useTranslation(
   namespace: string,
 ): { t: (key: string) => string } {
