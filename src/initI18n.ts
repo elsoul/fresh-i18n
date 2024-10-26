@@ -1,6 +1,7 @@
 export interface I18nOptions {
   languages: string[]
   defaultLanguage: string
+  localesDir: string
 }
 
 export function initI18n(options: I18nOptions) {
@@ -12,18 +13,14 @@ export function initI18n(options: I18nOptions) {
       const translations: { [namespace: string]: { [key: string]: string } } =
         {}
 
-      const validLocale = options.languages.includes(locale)
-        ? locale
-        : options.defaultLanguage
-
       for (const namespace of namespaces) {
         try {
           const response = await fetch(
-            `/locales/${validLocale}/${namespace}.json`,
+            `${options.localesDir}/${locale}/${namespace}.json`,
           )
           if (!response.ok) {
             throw new Error(
-              `Could not load translations for ${validLocale}/${namespace}`,
+              `Could not load translations for ${locale}/${namespace}`,
             )
           }
           translations[namespace] = await response.json()

@@ -1,23 +1,21 @@
-import { useSignal } from '@preact/signals'
 import { useLocale } from './useLocale.ts'
+import { useEffect, useState } from 'preact/hooks'
 
 export function useTranslation(namespace: string) {
-  const { locale } = useLocale()
-  const translations = useSignal<{ [key: string]: string }>({})
+  const { locale, loadNamespaceTranslations } = useLocale()
+  const [translations, setTranslations] = useState<Record<string, string>>({})
 
-  async function loadTranslations() {
-    try {
-      const response = await fetch(`/locales/${locale}/${namespace}.json`)
-      const data: { [key: string]: string } = await response.json()
-      translations.value = data
-    } catch (error) {
-      console.error(`Error loading translations for ${namespace}:`, error)
+  useEffect(() => {
+    async function loadTranslations() {
+      const namespaceTranslations = await loadNamespaceTranslations(namespace)
+      setTranslations(namespaceTranslations)
     }
-  }
+    loadTranslations()
+  }, [namespace, locale])
 
   function t(key: string): string {
-    return translations.value[key] || key
+    return translations[key] || key
   }
 
-  return { t, loadTranslations }
+  return { t }
 }

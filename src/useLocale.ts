@@ -1,24 +1,35 @@
 import { useSignal } from '@preact/signals'
+import { createContext } from 'preact'
+import { useContext } from 'preact/hooks'
 
-const localeSignal = useSignal<string | undefined>(undefined)
+interface LocaleContextProps {
+  locale: string
+  setLocale: (locale: string) => void
+  loadNamespaceTranslations: (
+    namespace: string,
+  ) => Promise<{ [key: string]: string }>
+}
 
-export function setInitialLocale(initialLocale: string) {
-  if (localeSignal.value === undefined) {
-    localeSignal.value = initialLocale
-  }
+const LocaleContext = createContext<LocaleContextProps>({
+  locale: 'en',
+  setLocale: () => {},
+  loadNamespaceTranslations: async () => ({}),
+})
+
+const localeSignal = useSignal('en')
+
+export function setInitialLocale(locale: string) {
+  localeSignal.value = locale
 }
 
 export function useLocale() {
-  if (localeSignal.value === undefined) {
-    throw new Error(
-      'Initial locale is not set. Make sure to initialize the locale with i18nPlugin.',
-    )
-  }
-
+  const context = useContext(LocaleContext)
   return {
     locale: localeSignal.value,
     setLocale: (newLocale: string) => {
       localeSignal.value = newLocale
+      context.setLocale(newLocale)
     },
+    loadNamespaceTranslations: context.loadNamespaceTranslations,
   }
 }

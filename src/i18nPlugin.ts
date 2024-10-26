@@ -5,6 +5,9 @@ import type { MiddlewareFn } from './types.ts'
 interface TranslationState {
   locale: string
   translations: { [namespace: string]: { [key: string]: string } }
+  loadNamespaceTranslations: (
+    namespace: string,
+  ) => Promise<{ [key: string]: string }>
 }
 
 export function i18nPlugin<T>(
@@ -22,18 +25,20 @@ export function i18nPlugin<T>(
       ? lang
       : options.defaultLanguage
 
-    // ロケールの初期化
     setInitialLocale(locale)
 
-    // 名前空間ごとの翻訳データをロード
-    const namespaces = ['common', 'homepage']
-    const translations = await i18n.loadNamespaceTranslations(
-      locale,
-      namespaces,
-    )
-
     ctx.state.locale = locale
-    ctx.state.translations = translations
+    ctx.state.translations = {}
+
+    ctx.state.loadNamespaceTranslations = async (namespace: string) => {
+      if (!ctx.state.translations[namespace]) {
+        const translations = await i18n.loadNamespaceTranslations(locale, [
+          namespace,
+        ])
+        ctx.state.translations[namespace] = translations[namespace]
+      }
+      return ctx.state.translations[namespace]
+    }
 
     return ctx.next()
   }
