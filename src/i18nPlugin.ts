@@ -1,8 +1,6 @@
-// i18nPlugin.ts
-
 import { join } from '@std/path'
 import { pathname, translationData } from '@/src/store.ts'
-import type { MiddlewareFn } from '@/src/types.ts'
+import type { MiddlewareFn, TranslationState } from '@/src/types.ts'
 
 /**
  * Configuration options for the i18n plugin.
@@ -43,9 +41,7 @@ async function readJsonFile(filePath: string): Promise<Record<string, string>> {
  */
 export const i18nPlugin = (
   { languages, defaultLanguage, localesDir }: I18nOptions,
-): MiddlewareFn<
-  { t: Record<string, Record<string, string>>; path: string; locale: string }
-> => {
+): MiddlewareFn<TranslationState & { [key: string]: unknown }> => {
   return async (ctx) => {
     const url = new URL(ctx.req.url)
     const pathSegments = url.pathname.split('/').filter(Boolean)
@@ -58,11 +54,12 @@ export const i18nPlugin = (
       ? '/' + pathSegments.slice(1).join('/')
       : url.pathname
 
+    // Set the current state values
     ctx.state.path = rootPath
+    ctx.state.locale = lang
+
     pathname.value = rootPath
 
-    // Set the current locale in the state
-    ctx.state.locale = lang
     const translationDataSSR: Record<string, Record<string, string>> = {}
 
     /**
@@ -81,10 +78,10 @@ export const i18nPlugin = (
       }
     }
 
-    // Load the common and metadata namespace and additional namespaces based on the URL path.
+    // Load the common namespaces and additional namespaces based on the URL path.
     await loadTranslation('common')
+    await loadTranslation('error')
     await loadTranslation('metadata')
-
     for (
       const segment of pathSegments.slice(lang === pathSegments[0] ? 1 : 0)
     ) {
