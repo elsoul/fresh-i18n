@@ -50,7 +50,7 @@ export const app = new App({
     languages: ['en', 'ja'], // Supported languages
     defaultLocale: 'en', // Default language
     localesDir: './locales', // Directory path to JSON files
-  }, ['common', 'homepage'])) // Example of namespace customization
+  }))
 
 await fsRoutes(app, {
   loadIsland: (path) => import(`./islands/${path}`),
