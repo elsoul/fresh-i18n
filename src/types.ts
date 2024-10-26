@@ -1,3 +1,5 @@
+// types.ts
+
 /**
  * Represents the context passed to every middleware function.
  *
@@ -9,7 +11,7 @@
 export interface FreshContext<State> {
   req: Request
   state: State
-  next: () => Promise<Response | void>
+  next: () => Promise<Response | void> // `next`を追加
 }
 
 /**
@@ -18,12 +20,10 @@ export interface FreshContext<State> {
  *
  * @template State - The state type for the middleware.
  * @param ctx - The FreshContext with the current request and state.
- * @param next - Function to call the next middleware.
  * @returns A promise resolving to a `Response` or void.
  */
 export type MiddlewareFn<State = TranslationState> = (
   ctx: FreshContext<State>,
-  next: () => Promise<Response | void>,
 ) => Promise<Response | void>
 
 /**
