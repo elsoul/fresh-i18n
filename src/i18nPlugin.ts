@@ -1,6 +1,7 @@
 import { join } from '@std/path'
 import { pathname, translationData } from '@/src/store.ts'
 import type { MiddlewareFn } from '@/src/types.ts'
+import type { TranslationState } from '@/src/types.ts'
 
 /**
  * Configuration options for the i18n plugin.
@@ -42,7 +43,7 @@ async function readJsonFile(filePath: string): Promise<Record<string, string>> {
 export const i18nPlugin = (
   { languages, defaultLanguage, localesDir }: I18nOptions,
 ): MiddlewareFn<
-  { t: Record<string, Record<string, string>>; path: string; locale: string }
+  TranslationState
 > => {
   return async (ctx) => {
     const url = new URL(ctx.req.url)
@@ -58,7 +59,7 @@ export const i18nPlugin = (
 
     // Set the current state values
     ctx.state.path = rootPath // Valid
-    ctx.state.locale = lang // Valid
+    ctx.state.lang = lang // Valid
 
     pathname.value = rootPath
 
