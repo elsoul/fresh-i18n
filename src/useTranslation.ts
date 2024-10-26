@@ -6,13 +6,9 @@ import { translationData } from '@/src/store.ts'
  * @param namespace - The namespace of translations to retrieve (e.g., 'common', 'company').
  * @returns An object containing a function to fetch translations by key within the given namespace.
  */
-export function useTranslation(namespace: string) {
-  /**
-   * Fetches the translation for a specific key within the namespace.
-   *
-   * @param key - The translation key to retrieve (e.g., 'title', 'welcome').
-   * @returns The translated string, or the key itself if no translation is found.
-   */
+export function useTranslation(
+  namespace: string,
+): { t: (key: string) => string } {
   const translate = (key: string): string => {
     return translationData.value[namespace]?.[key] ?? key
   }

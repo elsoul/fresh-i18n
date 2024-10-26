@@ -1,4 +1,4 @@
-import { join } from 'jsr:@std/path'
+import { join } from '@std/path'
 import { pathname, translationData } from '@/src/store.ts'
 import type { MiddlewareFn } from '@/src/types.ts'
 

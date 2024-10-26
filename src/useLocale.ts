@@ -5,12 +5,10 @@ import { currentLocale } from '@/src/store.ts'
  *
  * @returns An object containing the current locale and a function to change the locale.
  */
-export function useLocale() {
-  /**
-   * Updates the current locale and redirects to the new URL with updated locale in the path.
-   *
-   * @param newLocale - The new locale to set (e.g., 'en', 'ja').
-   */
+export function useLocale(): {
+  locale: string
+  changeLanguage: (newLocale: string) => void
+} {
   const changeLanguage = (newLocale: string) => {
     if (newLocale === currentLocale.value) return
 
@@ -18,7 +16,6 @@ export function useLocale() {
     const currentPath = globalThis.location.pathname.split('/').filter(Boolean)
     const updatedPath = `/${newLocale}/${currentPath.slice(1).join('/')}`
 
-    // Redirect to the new path with the updated locale
     globalThis.location.href =
       `${globalThis.location.origin}${updatedPath}${globalThis.location.search}`
   }
