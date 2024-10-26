@@ -72,9 +72,13 @@ export const i18nPlugin = (
      */
     const loadTranslation = async (namespace: string) => {
       const filePath = join(localesDir, lang, `${namespace}.json`)
-      const data = await readJsonFile(filePath)
-      if (Object.keys(data).length > 0) {
-        translationDataSSR[namespace] = data // Only add if data exists
+      try {
+        const data = await readJsonFile(filePath)
+        if (Object.keys(data).length > 0) {
+          translationDataSSR[namespace] = data // Only add if data exists
+        }
+      } catch {
+        // Ignore if the translation file does not exist or cannot be read
       }
     }
 
