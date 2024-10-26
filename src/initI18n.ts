@@ -14,18 +14,16 @@ export function initI18n(options: I18nOptions) {
         {}
 
       for (const namespace of namespaces) {
+        const path = `${options.localesDir}/${locale}/${namespace}.json`
+
         try {
-          const response = await fetch(
-            `${options.localesDir}/${locale}/${namespace}.json`,
-          )
-          if (!response.ok) {
-            throw new Error(
-              `Could not load translations for ${locale}/${namespace}`,
-            )
-          }
-          translations[namespace] = await response.json()
+          const module = await import(path)
+          translations[namespace] = module.default || {}
         } catch (error) {
-          console.error(error)
+          console.error(
+            `Could not load translations for ${locale}/${namespace}`,
+            error,
+          )
           translations[namespace] = {}
         }
       }

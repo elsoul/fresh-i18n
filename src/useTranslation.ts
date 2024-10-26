@@ -4,18 +4,18 @@ import { useEffect, useState } from 'preact/hooks'
 export function useTranslation(
   namespace: string,
 ): { t: (key: string) => string } {
-  const { locale, loadNamespaceTranslations } = useLocale()
+  const { loadNamespaceTranslations } = useLocale()
   const [translations, setTranslations] = useState<Record<string, string>>({})
 
   useEffect(() => {
-    async function loadTranslations() {
-      const namespaceTranslations = await loadNamespaceTranslations(namespace)
-      setTranslations(namespaceTranslations)
+    const loadTranslations = async () => {
+      const loadedTranslations = await loadNamespaceTranslations(namespace)
+      setTranslations(loadedTranslations)
     }
     loadTranslations()
-  }, [namespace, locale])
+  }, [namespace])
 
-  function t(key: string): string {
+  const t = (key: string): string => {
     return translations[key] || key
   }
 

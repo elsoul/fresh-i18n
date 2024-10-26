@@ -24,7 +24,6 @@ export function i18nPlugin<T>(
     const locale = options.languages.includes(lang)
       ? lang
       : options.defaultLanguage
-
     setInitialLocale(locale)
 
     ctx.state.locale = locale
