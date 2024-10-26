@@ -8,9 +8,9 @@ import { translationData } from '@/src/store.ts'
 export function useTranslation(): { t: (key: string) => string } {
   const translate = (key: string): string => {
     const keys = key.split('.') // Split the key by dot
-    let value: unknown = translationData.value // Get the value from translationData
+    let value: unknown = translationData.get() // Get the value from translationData
 
-    console.log('Translation Data:', translationData.value) // Check translation data
+    console.log('Translation Data:', translationData.get()) // Check translation data
 
     for (const k of keys) {
       if (value && typeof value === 'object' && k in value) {

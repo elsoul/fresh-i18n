@@ -1,5 +1,5 @@
 import { join } from '@std/path'
-import { pathname, translationData } from '@/src/store.ts'
+import { currentLocale, pathname, translationData } from '@/src/store.ts'
 import type { MiddlewareFn, TranslationState } from '@/src/types.ts'
 
 /**
@@ -56,7 +56,8 @@ export const i18nPlugin = (
     ctx.state.path = rootPath
     ctx.state.locale = lang
 
-    pathname.value = rootPath
+    pathname.set(rootPath)
+    currentLocale.set(lang)
 
     const translationDataSSR: Record<string, Record<string, string>> = {}
 
@@ -84,7 +85,7 @@ export const i18nPlugin = (
     }
 
     ctx.state.t = translationDataSSR
-    translationData.value = translationDataSSR
+    translationData.set(translationDataSSR)
 
     const response = await ctx.next() as Response
     return response ?? new Response(null, { status: 204 })

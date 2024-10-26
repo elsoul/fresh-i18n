@@ -6,5 +6,5 @@ import { pathname } from '@/src/store.ts'
  * @returns The current pathname without the locale prefix.
  */
 export function usePathname(): string {
-  return pathname.value
+  return pathname.get()
 }

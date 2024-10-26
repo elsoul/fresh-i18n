@@ -10,9 +10,9 @@ export function useLocale(): {
   changeLanguage: (newLocale: string) => void
 } {
   const changeLanguage = (newLocale: string) => {
-    if (newLocale === currentLocale.value) return
+    if (newLocale === currentLocale.get()) return
 
-    currentLocale.value = newLocale
+    currentLocale.set(newLocale)
     const currentPath = globalThis.location.pathname.split('/').filter(Boolean)
     const updatedPath = `/${newLocale}/${currentPath.slice(1).join('/')}`
 
@@ -20,5 +20,5 @@ export function useLocale(): {
       `${globalThis.location.origin}${updatedPath}${globalThis.location.search}`
   }
 
-  return { locale: currentLocale.value, changeLanguage }
+  return { locale: currentLocale.get(), changeLanguage }
 }

@@ -19,7 +19,7 @@ type LinkProps = JSX.IntrinsicElements['a'] & {
  * @returns A link component with the current locale prefixed to the href.
  */
 export function Link({ href, children, ...props }: LinkProps): h.JSX.Element {
-  const localizedHref = `/${currentLocale.value}${
+  const localizedHref = `/${currentLocale.get()}${
     href.startsWith('/') ? href : `/${href}`
   }`
 
