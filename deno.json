@@ -1,6 +1,6 @@
 {
   "name": "@elsoul/fresh-i18n",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "A simple and flexible internationalization (i18n) plugin for Deno's Fresh framework.",
   "runtimes": ["deno", "browser"],
   "exports": "./mod.ts",

@@ -1,7 +1,6 @@
 import { join } from '@std/path'
 import { pathname, translationData } from '@/src/store.ts'
-import type { MiddlewareFn } from '@/src/types.ts'
-import type { TranslationState } from '@/src/types.ts'
+import type { MiddlewareFn, TranslationState } from '@/src/types.ts'
 
 /**
  * Configuration options for the i18n plugin.
@@ -23,8 +22,8 @@ export interface I18nOptions {
  * @returns Parsed JSON object as a record of key-value pairs.
  */
 async function readJsonFile(filePath: string): Promise<Record<string, string>> {
-  const content = await Deno.readTextFile(filePath)
   try {
+    const content = await Deno.readTextFile(filePath)
     return JSON.parse(content) as Record<string, string>
   } catch {
     return {}
@@ -42,9 +41,7 @@ async function readJsonFile(filePath: string): Promise<Record<string, string>> {
  */
 export const i18nPlugin = (
   { languages, defaultLanguage, localesDir }: I18nOptions,
-): MiddlewareFn<
-  TranslationState
-> => {
+): MiddlewareFn<TranslationState> => {
   return async (ctx) => {
     const url = new URL(ctx.req.url)
     const pathSegments = url.pathname.split('/').filter(Boolean)
@@ -52,14 +49,12 @@ export const i18nPlugin = (
       ? pathSegments[0]
       : defaultLanguage
 
-    // Sets the root path without the language prefix for client-side navigation.
     const rootPath = lang === pathSegments[0]
       ? '/' + pathSegments.slice(1).join('/')
       : url.pathname
 
-    // Set the current state values
-    ctx.state.path = rootPath // Valid
-    ctx.state.lang = lang // Valid
+    ctx.state.path = rootPath
+    ctx.state.lang = lang
 
     pathname.value = rootPath
 
@@ -73,17 +68,12 @@ export const i18nPlugin = (
      */
     const loadTranslation = async (namespace: string) => {
       const filePath = join(localesDir, lang, `${namespace}.json`)
-      try {
-        const data = await readJsonFile(filePath)
-        if (Object.keys(data).length > 0) {
-          translationDataSSR[namespace] = data // Only add if data exists
-        }
-      } catch {
-        // Ignore if the translation file does not exist or cannot be read
+      const data = await readJsonFile(filePath)
+      if (Object.keys(data).length > 0) {
+        translationDataSSR[namespace] = data
       }
     }
 
-    // Load the common namespaces and additional namespaces based on the URL path.
     await loadTranslation('common')
     await loadTranslation('error')
     await loadTranslation('metadata')
@@ -96,8 +86,7 @@ export const i18nPlugin = (
     ctx.state.t = translationDataSSR
     translationData.value = translationDataSSR
 
-    // Ensure `ctx.next()` returns a response and handle the response in the middleware chain.
-    const response = await ctx.next()
+    const response = await ctx.next() as Response
     return response ?? new Response(null, { status: 204 })
   }
 }
