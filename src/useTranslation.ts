@@ -1,7 +1,9 @@
 import { useLocale } from './useLocale.ts'
 import { useEffect, useState } from 'preact/hooks'
 
-export function useTranslation(namespace: string) {
+export function useTranslation(
+  namespace: string,
+): { t: (key: string) => string } {
   const { locale, loadNamespaceTranslations } = useLocale()
   const [translations, setTranslations] = useState<Record<string, string>>({})
 

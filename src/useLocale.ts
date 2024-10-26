@@ -22,7 +22,7 @@ export function setInitialLocale(locale: string) {
   localeSignal.value = locale
 }
 
-export function useLocale() {
+export function useLocale(): LocaleContextProps {
   const context = useContext(LocaleContext)
   return {
     locale: localeSignal.value,
