@@ -1,5 +1,3 @@
-// useTranslation.ts
-
 import { translationData } from '@/src/store.ts'
 
 /**

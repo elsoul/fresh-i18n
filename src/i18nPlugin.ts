@@ -1,3 +1,5 @@
+// i18nPlugin.ts
+
 import { join } from '@std/path'
 import { pathname, translationData } from '@/src/store.ts'
 import type { MiddlewareFn } from '@/src/types.ts'
@@ -79,8 +81,10 @@ export const i18nPlugin = (
       }
     }
 
-    // Load the common namespace and additional namespaces based on the URL path.
+    // Load the common and metadata namespace and additional namespaces based on the URL path.
     await loadTranslation('common')
+    await loadTranslation('metadata')
+
     for (
       const segment of pathSegments.slice(lang === pathSegments[0] ? 1 : 0)
     ) {
