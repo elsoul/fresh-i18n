@@ -152,7 +152,7 @@ export const handler = define.handlers({
 })
 
 export default define.page<typeof handler>(function Home(props) {
-  const { t } = createTranslator(props.state.translationData)
+  const t = createTranslator(props.state.translationData)
   return (
     <div>
       {t('common.title')} // Home or ホーム
@@ -246,7 +246,7 @@ export function useTranslation() {
     return typeof result === 'string' ? result : '' // Return the result if it's a string
   }
 
-  return { t }
+  return  t 
 }
 ```
 
@@ -292,7 +292,7 @@ import { usePathname } from '@/hooks/i18n/usePathname.ts'
 import { useLocale } from '@/hooks/i18n/useLocale.ts'
 
 export default function IslandsComponent() {
-  const { t } = useTranslation()
+  const t = useTranslation()
   const path = usePathname()
   const { locale } = useLocale()
 
