@@ -6,7 +6,7 @@
  */
 export function createTranslator(
   translations: Record<string, Record<string, string>>,
-) {
+): (key: string) => string {
   /**
    * Translates a key string like 'common.title' or 'common.titlerow.title.example'
    * by traversing the nested structure of `translations`.
