@@ -1,5 +1,4 @@
 import { join } from '@std/path'
-import { currentLocale, pathname, translationData } from '@/src/store.ts'
 import type { MiddlewareFn, TranslationState } from '@/src/types.ts'
 
 /**
@@ -31,6 +30,31 @@ async function readJsonFile(filePath: string): Promise<Record<string, string>> {
 }
 
 /**
+ * Retrieves a translation value from a nested translation object.
+ *
+ * @param translations - The translations object (e.g., ctx.state.translationData).
+ * @param key - The translation key in dot notation (e.g., 'common.title').
+ * @returns The translated string, or an empty string if the key is not found.
+ */
+function getTranslation(
+  translations: Record<string, unknown>,
+  key: string,
+): string {
+  const keys = key.split('.')
+  let result: unknown = translations
+
+  for (const k of keys) {
+    if (typeof result === 'object' && result !== null && k in result) {
+      result = (result as Record<string, unknown>)[k]
+    } else {
+      return '' // Return empty string if key is not found
+    }
+  }
+
+  return typeof result === 'string' ? result : ''
+}
+
+/**
  * Middleware function to initialize internationalization (i18n) support.
  * This plugin detects the user's language based on the URL, loads the necessary
  * translation files dynamically, and saves the translations, locale, and base path as
@@ -56,10 +80,7 @@ export const i18nPlugin = (
     ctx.state.path = rootPath
     ctx.state.locale = lang
 
-    pathname.set(rootPath)
-    currentLocale.set(lang)
-
-    const translationDataSSR: Record<string, Record<string, string>> = {}
+    const translationData: Record<string, Record<string, string>> = {}
 
     /**
      * Loads a translation namespace by reading the corresponding JSON file from `localesDir`.
@@ -71,7 +92,7 @@ export const i18nPlugin = (
       const filePath = join(localesDir, lang, `${namespace}.json`)
       const data = await readJsonFile(filePath)
       if (Object.keys(data).length > 0) {
-        translationDataSSR[namespace] = data
+        translationData[namespace] = data
       }
     }
 
@@ -84,10 +105,12 @@ export const i18nPlugin = (
       await loadTranslation(segment)
     }
 
-    ctx.state.t = translationDataSSR
-    translationData.set(translationDataSSR)
+    // Set translationData and t function in ctx.state
+    ctx.state.translationData = translationData
+    ctx.state.t = (key: string) =>
+      getTranslation(ctx.state.translationData, key)
 
     const response = await ctx.next() as Response
-    return response ?? new Response(null, { status: 204 })
+    return response
   }
 }

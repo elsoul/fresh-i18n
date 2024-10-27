@@ -1,4 +1,19 @@
 /**
+ * Represents the state of translations, the base path, and locale within the app.
+ *
+ * @property translationData - Object holding translation data for different namespaces.
+ * @property path - The base path of the URL without the language prefix.
+ * @property locale - The current locale code, used for translations.
+ * @property t - A function to get a translated string by key in dot notation.
+ */
+export interface TranslationState {
+  translationData: Record<string, Record<string, string>>
+  path: string
+  locale: string
+  t: (key: string) => string // Function to retrieve translation string
+}
+
+/**
  * Represents the context passed to every middleware function.
  *
  * @template State - The type of state held in the context.
@@ -23,16 +38,3 @@ export interface FreshContext<State> {
 export type MiddlewareFn<State> = (
   ctx: FreshContext<State>,
 ) => Promise<Response>
-
-/**
- * Represents the state of translations, the base path, and locale within the app.
- *
- * @property t - Object holding translation data for different namespaces.
- * @property path - The base path of the URL without the language prefix.
- * @property locale - The current locale code, used for translations.
- */
-export interface TranslationState {
-  t: Record<string, Record<string, string>>
-  path: string
-  locale: string
-}

@@ -87,7 +87,7 @@ directly via ctx.state.t, enabling SSR with localized data.
 
 ```typescript
 import { createDefine } from 'fresh'
-import type { TranslationState } from '@elsoul/fresh-i18n'
+import type { TranslationState } from 'fresh-i18n'
 
 interface State {
   title?: string
@@ -97,10 +97,8 @@ interface State {
   noIndex?: boolean
 }
 
-// Combine TranslationState with custom State properties
 export type ExtendedState = State & TranslationState
 
-// Define the extended state for use in your Fresh app
 export const define = createDefine<ExtendedState>()
 ```
 
@@ -114,6 +112,8 @@ For example, if the URL is `https://example.com/en/company/profile`, the plugin
 will load the following files (if they exist):
 
 - `./locales/en/common.json` (always loaded as the base translation)
+- `./locales/en/metadata.json` (always loaded as the base translation)
+- `./locales/en/error.json` (always loaded as the base translation)
 - `./locales/en/company.json`
 - `./locales/en/profile.json`
 
@@ -138,78 +138,170 @@ file does not exist, it is skipped without an error, ensuring flexibility.
 }
 ```
 
-### Step 3: Use Translations in Components
-
-Leverage `useTranslation()` and `useLocale()` hooks in components to access
-translations and handle language switching dynamically.
+### Step 3: Use Translations in Routes
 
 ```tsx
-import { useLocale, useTranslation } from '@elsoul/fresh-i18n'
+import { define } from '@/utils/state.ts'
 
-export default function IslandsComponent() {
-  const { t } = useTranslation()
-  const { locale, changeLanguage } = useLocale()
+export const handler = define.handlers({
+  GET(ctx) {
+    console.log('ctx', ctx.state.translationData) // Access translation data directly
+    return page()
+  },
+})
 
+export default define.page<typeof handler>(function Home(props) {
+  console.log('props', props.state.t('common.title')) // Access translation data using getTranslation function via props
   return (
     <div>
-      <h1>{t('common.title')}</h1> {/* Outputs "Home" or "ホーム" */}
-      <p>{t('common.welcome')}</p> {/* Outputs "Welcome" or "ようこそ" */}
-      <p>Current language: {locale}</p>
-      <button onClick={() => changeLanguage('en')}>English</button>
-      <button onClick={() => changeLanguage('ja')}>日本語</button>
     </div>
+  )
+})
+```
+
+### Step 4: Use Translation in Islands
+
+You need to share ctx.state data with islands.
+
+```tsx:./routes/_layouts.tsx
+import type { PageProps } from 'fresh'
+import StateShareLayer from '@/islands/layouts/StateShareLayer.tsx'
+import type { ExtendedState } from '@/utils/state.ts'
+
+export default function RootLayout(
+  { Component, state }: PageProps,
+) {
+  return (
+    <>
+      <StateShareLayer state={state as ExtendedState} />
+      <Component />
+    </>
   )
 }
 ```
 
-```tsx
-// Example usage in a route handler for SSR
-export const handler = define.handlers({
-  GET(ctx) {
-    console.log('ctx', ctx.state.t) // Access translation data directly
-    return page()
-  },
+```tsx:./islands/layouts/StateShareLayer.tsx
+import { type ExtendedState } from '@/utils/state.ts'
+import { atom, useAtom } from 'fresh-atom'
+import { useEffect } from 'preact/hooks'
+
+type Props = {
+  state: ExtendedState
+}
+
+export const stateAtom = atom<ExtendedState>({
+  title: '',
+  theme: 'dark',
+  description: '',
+  ogImage: '',
+  noIndex: false,
+  locale: 'en',
+  t: {},
+  path: '/',
 })
+
+export default function StateShareLayer({ state }: Props) {
+  const [, setState] = useAtom(stateAtom)
+
+  useEffect(() => {
+    setState(state)
+  }, [state])
+
+  return null
+}
 ```
 
-### API Reference
+#### Useful hooks
 
-#### `i18nPlugin(options)`
+You can create useful hooks to access translation data on islands.
 
-Registers the i18n middleware for handling translation loading and locale
-management.
+```tsx:./hooks/i18n/useTranslation.ts
+import { useAtom } from 'fresh-atom'
+import { stateAtom } from '@/islands/layouts/StateShareLayer.tsx'
 
-- **Options**:
-  - `languages` (string[]): An array of supported languages (e.g.,
-    `['en', 'ja']`).
-  - `defaultLanguage` (string): The default language code, used if no locale is
-    detected.
-  - `localesDir` (string): Path to the directory containing locale files.
+export function useTranslation() {
+  const [state] = useAtom(stateAtom)
 
-#### `useTranslation(namespace: string)`
+  /**
+   * Translates a key string like 'common.title' or 'common.titlerow.title.example'
+   * by traversing the nested structure of `state.t`.
+   *
+   * @param key - The translation key in dot notation (e.g., 'common.title').
+   * @returns The translated string, or an empty string if the key is not found.
+   */
+  const t = (key: string): string => {
+    const keys = key.split('.')
+    let result: Record<string, unknown> | string = state.t
 
-Hook to access translation strings within a specified namespace.
+    for (const k of keys) {
+      if (typeof result === 'object' && result !== null && k in result) {
+        result = result[k] as Record<string, unknown> | string
+      } else {
+        return '' // Key not found, return empty string or default text
+      }
+    }
 
-- **Parameters**:
-  - `namespace` (string): Namespace identifier to load relevant translations.
+    return typeof result === 'string' ? result : '' // Return the result if it's a string
+  }
 
-#### `useLocale()`
+  return { t }
+}
+```
 
-Hook to retrieve and change the current locale.
+```tsx:./hooks/i18n/usePathname.ts
+import { useAtom } from 'fresh-atom'
+import { stateAtom } from '@/islands/layouts/StateShareLayer.tsx'
 
-- **Returns**:
-  - `locale` (string): Current locale code.
-  - `changeLanguage` (function): Function to update the locale.
+export function usePathname() {
+  const [state] = useAtom(stateAtom)
+  return state.path
+}
+```
 
-#### `Link` Component
+```tsx:./hooks/i18n/useLocale.ts
+import { useAtom } from 'fresh-atom'
+import { stateAtom } from '@/islands/layouts/StateShareLayer.tsx'
 
-A custom `Link` component that maintains the current locale in app-internal
-links for consistent navigation.
+export function useLocale() {
+  const [state, setState] = useAtom(stateAtom)
+
+  /**
+   * Sets a new locale, updates the global state, and redirects
+   * to the new locale's URL path to update page content.
+   *
+   * @param locale - The new locale string (e.g., 'en', 'ja').
+   */
+  const setLocale = (locale: string) => {
+    setState((prevState) => ({ ...prevState, locale }))
+
+    const newPath = `/${locale}${state.path}`
+    globalThis.location.href = newPath
+  }
+
+  return { locale: state.locale, setLocale }
+}
+```
+
+##### Usage
 
 ```tsx
-import { Link } from '@elsoul/fresh-i18n';
+import { useTranslation } from '@/hooks/i18n/useTranslation.ts'
+import { usePathname } from '@/hooks/i18n/usePathname.ts'
+import { useLocale } from '@/hooks/i18n/useLocale.ts'
 
-<Link href="/about">About Us</Link> {/* Locale-aware navigation */}
+export default function IslandsComponent() {
+  const { t } = useTranslation()
+  const path = usePathname()
+  const { locale } = useLocale()
+
+  console.log('path', path)
+  console.log('locale', locale)
+  return (
+    <div>
+      {t('common.title')} // Home or ホーム
+    </div>
+  )
+}
 ```
 
 ## Contributing
