@@ -142,6 +142,7 @@ file does not exist, it is skipped without an error, ensuring flexibility.
 
 ```tsx
 import { define } from '@/utils/state.ts'
+import { createTranslator } from 'jsr:@elsoul/fresh-i18n'
 
 export const handler = define.handlers({
   GET(ctx) {
@@ -151,9 +152,10 @@ export const handler = define.handlers({
 })
 
 export default define.page<typeof handler>(function Home(props) {
-  console.log('props', props.state.t('common.title')) // Access translation data using getTranslation function via props
+  const { t } = createTranslator(props.state.translationData)
   return (
     <div>
+      {t('common.title')} // Home or ホーム
     </div>
   )
 })
@@ -196,7 +198,7 @@ export const stateAtom = atom<ExtendedState>({
   ogImage: '',
   noIndex: false,
   locale: 'en',
-  t: {},
+  translationData: {},
   path: '/',
 })
 
@@ -231,7 +233,7 @@ export function useTranslation() {
    */
   const t = (key: string): string => {
     const keys = key.split('.')
-    let result: Record<string, unknown> | string = state.t
+    let result: Record<string, unknown> | string = state.translationData
 
     for (const k of keys) {
       if (typeof result === 'object' && result !== null && k in result) {

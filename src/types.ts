@@ -4,13 +4,11 @@
  * @property translationData - Object holding translation data for different namespaces.
  * @property path - The base path of the URL without the language prefix.
  * @property locale - The current locale code, used for translations.
- * @property t - A function to get a translated string by key in dot notation.
  */
 export interface TranslationState {
   translationData: Record<string, Record<string, string>>
   path: string
   locale: string
-  t: (key: string) => string // Function to retrieve translation string
 }
 
 /**

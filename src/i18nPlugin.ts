@@ -30,31 +30,6 @@ async function readJsonFile(filePath: string): Promise<Record<string, string>> {
 }
 
 /**
- * Retrieves a translation value from a nested translation object.
- *
- * @param translations - The translations object (e.g., ctx.state.translationData).
- * @param key - The translation key in dot notation (e.g., 'common.title').
- * @returns The translated string, or an empty string if the key is not found.
- */
-function getTranslation(
-  translations: Record<string, unknown>,
-  key: string,
-): string {
-  const keys = key.split('.')
-  let result: unknown = translations
-
-  for (const k of keys) {
-    if (typeof result === 'object' && result !== null && k in result) {
-      result = (result as Record<string, unknown>)[k]
-    } else {
-      return '' // Return empty string if key is not found
-    }
-  }
-
-  return typeof result === 'string' ? result : ''
-}
-
-/**
  * Middleware function to initialize internationalization (i18n) support.
  * This plugin detects the user's language based on the URL, loads the necessary
  * translation files dynamically, and saves the translations, locale, and base path as
@@ -105,10 +80,7 @@ export const i18nPlugin = (
       await loadTranslation(segment)
     }
 
-    // Set translationData and t function in ctx.state
     ctx.state.translationData = translationData
-    ctx.state.t = (key: string) =>
-      getTranslation(ctx.state.translationData, key)
 
     const response = await ctx.next() as Response
     return response
