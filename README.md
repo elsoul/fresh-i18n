@@ -102,6 +102,24 @@ export type ExtendedState = State & TranslationState
 export const define = createDefine<ExtendedState>()
 ```
 
+#### Create [locale] Directory on routes
+
+Update Routing Structure to Include [locale] Folder Important: The [locale]
+folder is now mandatory in your routing structure. All your route files should
+be placed inside the [locale] directory to handle language prefixes in URLs
+effectively.
+
+Directory Structure Your routes directory should look like this:
+
+```
+routes/
+├── [locale]/
+│   ├── index.tsx
+│   ├── about.tsx
+│   ├── contact.tsx
+│   └── ...other routes
+```
+
 ### Step 2: Create Locale JSON Files
 
 Inside the `locales` directory, create subfolders for each locale and organize
