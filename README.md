@@ -316,7 +316,7 @@ interface LinkProps extends JSX.HTMLAttributes<HTMLAnchorElement> {
 }
 
 export default function Link({ href, children, ...props }: LinkProps) {
-  const locale = useLocale()
+  const { locale } = useLocale()
 
   const localizedHref = `/${locale}${href}`
 
