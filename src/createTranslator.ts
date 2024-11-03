@@ -12,7 +12,7 @@ export function createTranslator(
    * by traversing the nested structure of `translations`.
    *
    * @param key - The translation key in dot notation (e.g., 'common.title').
-   * @returns The translated string, or an empty string if the key is not found.
+   * @returns The translated string, or the key string if the key data is not found.
    */
   const t = (key: string): string => {
     const keys = key.split('.')
@@ -22,11 +22,11 @@ export function createTranslator(
       if (typeof result === 'object' && result !== null && k in result) {
         result = (result as Record<string, unknown>)[k]
       } else {
-        return '' // Return empty string if key is not found
+        result = key
       }
     }
 
-    return typeof result === 'string' ? result : ''
+    return typeof result === 'string' ? result : key
   }
 
   return t
